@@ -465,6 +465,7 @@ int main(int argc, char *argv[])
         interactive = 1;
     }
 
+    rig_debug(RIG_DEBUG_VERBOSE, "calling rig_init:>>>>>>>>>> my_model = %d\n", my_model);
     my_rig = rig_init(my_model);
 
     if (!my_rig)
@@ -476,6 +477,7 @@ int main(int argc, char *argv[])
         exit(2);
     }
 
+    rig_debug(RIG_DEBUG_VERBOSE, "calling set_conf:>>>>>>>>>>>> conf_parms = %s\n", conf_parms);
     retcode = set_conf(my_rig, conf_parms);
 
     if (retcode != RIG_OK)
@@ -486,6 +488,7 @@ int main(int argc, char *argv[])
 
     if (rig_file)
     {
+        rig_debug(RIG_DEBUG_VERBOSE, "%s:%s: >>>>>>>>>>>>>> Copying rig_file (%s) to my_rig:\n", __FILE__, __func__, rig_file);
         strncpy(my_rig->state.rigport.pathname, rig_file, HAMLIB_FILPATHLEN - 1);
     }
 
