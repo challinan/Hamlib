@@ -1,0 +1,6 @@
+# In listening terminal:
+stty -f /dev/cu.usbserial-1420 9600 raw -echo -echoe -echok
+nc -6 -l 4532 </dev/cu.usbserial-1420 >/dev/cu.usbserial-1420
+
+# In rigctl terminal
+rigctl -m 1035 -r localhost
