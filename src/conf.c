@@ -1091,7 +1091,7 @@ const struct confparams *HAMLIB_API rig_confparam_lookup(RIG *rig,
     const struct confparams *cfp;
     token_t token;
 
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called >>>>>>>>>>>>>>>> - param name = %s\n", __func__, name);
 
     if (!rig || !rig->caps)
     {
@@ -1145,7 +1145,7 @@ token_t HAMLIB_API rig_token_lookup(RIG *rig, const char *name)
 {
     const struct confparams *cfp;
 
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called >>>>>>>>>>>>>>>>>>>>>>>>, param name = %s\n", __func__, name);
 
     cfp = rig_confparam_lookup(rig, name);
 
@@ -1174,7 +1174,7 @@ token_t HAMLIB_API rig_token_lookup(RIG *rig, const char *name)
  */
 int HAMLIB_API rig_set_conf(RIG *rig, token_t token, const char *val)
 {
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called with token=%ld, val=%s\n", __func__, token, val);
 
     if (!rig || !rig->caps)
     {
@@ -1227,7 +1227,7 @@ int HAMLIB_API rig_set_conf(RIG *rig, token_t token, const char *val)
  */
 int HAMLIB_API rig_get_conf(RIG *rig, token_t token, char *val)
 {
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called>>>>>>>>>>>> with token=%ld\n", __func__, token);
 
     if (!rig || !rig->caps || !val)
     {
