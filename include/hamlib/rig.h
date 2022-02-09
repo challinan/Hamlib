@@ -948,8 +948,8 @@ typedef uint64_t rig_level_e;
 #define RIG_LEVEL_SPECTRUM_AVG         CONSTANT_64BIT_FLAG(46)      /*!< \c SPECTRUM_AVG -- Spectrum scope averaging mode, arg int (see struct rig_spectrum_avg_mode). Supported averaging modes defined in rig caps. */
 #define RIG_LEVEL_SPECTRUM_ATT         CONSTANT_64BIT_FLAG(47)      /*!< \c SPECTRUM_ATT -- Spectrum scope attenuator, arg int (dB). Supported attenuator values defined in rig caps. */
 #define RIG_LEVEL_TEMP_METER           CONSTANT_64BIT_FLAG(48)      /*!< \c TEMP_METER -- arg int (C, centigrade) */
-#define RIG_LEVEL_48           CONSTANT_64BIT_FLAG(48)      /*!< \c Future use */
-#define RIG_LEVEL_49           CONSTANT_64BIT_FLAG(49)      /*!< \c Future use */
+#define RIG_LEVEL_CWSPEED              CONSTANT_64BIT_FLAG(48)      /*!< \c K3 CW Keyer Speed */
+#define RIG_LEVEL_ICONSTATUS           CONSTANT_64BIT_FLAG(49)      /*!< \c K3 Icons and Status */
 #define RIG_LEVEL_50           CONSTANT_64BIT_FLAG(50)      /*!< \c Future use */
 #define RIG_LEVEL_51           CONSTANT_64BIT_FLAG(51)      /*!< \c Future use */
 #define RIG_LEVEL_52           CONSTANT_64BIT_FLAG(52)      /*!< \c Future use */
@@ -1124,15 +1124,15 @@ typedef uint64_t setting_t;
 #define RIG_FUNC_TRANSCEIVE CONSTANT_64BIT_FLAG (42)   /*!< \c TRANSCEIVE -- Send radio state changes automatically ON/OFF */
 #define RIG_FUNC_SPECTRUM   CONSTANT_64BIT_FLAG (43)   /*!< \c SPECTRUM -- Spectrum scope data output ON/OFF */
 #define RIG_FUNC_SPECTRUM_HOLD CONSTANT_64BIT_FLAG (44)   /*!< \c SPECTRUM_HOLD -- Pause spectrum scope updates ON/OFF */
-#define RIG_FUNC_BIT45      CONSTANT_64BIT_FLAG (45)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT46      CONSTANT_64BIT_FLAG (46)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT47      CONSTANT_64BIT_FLAG (47)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT48      CONSTANT_64BIT_FLAG (48)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT49      CONSTANT_64BIT_FLAG (49)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT50      CONSTANT_64BIT_FLAG (50)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT51      CONSTANT_64BIT_FLAG (51)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT52      CONSTANT_64BIT_FLAG (52)   /*!< \c available for future RIG_FUNC items */
-#define RIG_FUNC_BIT53      CONSTANT_64BIT_FLAG (53)   /*!< \c available for future RIG_FUNC items */
+#define RIG_FUNC_SPOT       CONSTANT_64BIT_FLAG (45)   /*!< \c SPOT - Elecraft */
+#define RIG_FUNC_ABSWAP     CONSTANT_64BIT_FLAG (46)   /*!< \c SWAP A/B VFOs */
+#define RIG_FUNC_TUNE       CONSTANT_64BIT_FLAG (47)   /*!< \c TUNE - Elecraft */
+#define RIG_FUNC_RX         CONSTANT_64BIT_FLAG (48)   /*!< \c RX - kill Transmit */
+#define RIG_FUNC_CWTX       CONSTANT_64BIT_FLAG (49)   /*!< \c K3 TX CW Command */
+#define RIG_FUNC_TXTEST     CONSTANT_64BIT_FLAG (50)   /*!< \c K3 TX Test Function */
+#define RIG_FUNC_BANDNUM    CONSTANT_64BIT_FLAG (51)   /*!< \c K3 Band Num "BN" Function */
+#define RIG_FUNC_VFOA2B      CONSTANT_64BIT_FLAG (52)  /*!< \c K3 Copy VFO A to B */
+#define RIG_FUNC_XFIL       CONSTANT_64BIT_FLAG (53)   /*!< \c K3 XFIL Selection */
 #define RIG_FUNC_BIT54      CONSTANT_64BIT_FLAG (54)   /*!< \c available for future RIG_FUNC items */
 #define RIG_FUNC_BIT55      CONSTANT_64BIT_FLAG (55)   /*!< \c available for future RIG_FUNC items */
 #define RIG_FUNC_BIT56      CONSTANT_64BIT_FLAG (56)   /*!< \c available for future RIG_FUNC items */

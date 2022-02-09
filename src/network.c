@@ -273,6 +273,8 @@ int network_open(hamlib_port_t *rp, int default_port)
             RETURNFUNC(-RIG_EIO);
         }
 
+        // this connect call takes more than a minute if the remote end is not listening
+        // we should fix this
         if (connect(fd, res->ai_addr, res->ai_addrlen) == 0)
         {
             break;

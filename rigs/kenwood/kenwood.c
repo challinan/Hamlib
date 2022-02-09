@@ -245,7 +245,7 @@ int kenwood_transaction(RIG *rig, const char *cmdstr, char *data,
     struct kenwood_priv_caps *caps = kenwood_caps(rig);
     struct rig_state *rs;
 
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called with cmd:%s\n", __func__, cmdstr);
 
     if ((!cmdstr && !datasize) || (datasize && !data))
     {
@@ -339,6 +339,10 @@ transaction_write:
         int skip = strncmp(cmdstr, "RX", 2) == 0;
         skip |= strncmp(cmdstr, "RU", 2) == 0;
         skip |= strncmp(cmdstr, "RD", 2) == 0;
+        // Don't mess with TUNE (SWH16) or KY (CWTX) mode, doesn't return anything
+        skip |= strncmp(cmdstr, "SWH16", 5) == 0;
+        skip |= strncmp(cmdstr, "KYW", 3) == 0;
+        skip |= strncmp(cmdstr, "SWT", 3) == 0;
 
         if (skip)
         {
@@ -610,7 +614,7 @@ int kenwood_safe_transaction(RIG *rig, const char *cmd, char *buf,
     int err;
     int retry = 0;
 
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called - cmd = %s\n", __func__, cmd);
 
     if (!cmd)
     {
@@ -3741,7 +3745,7 @@ int kenwood_get_level(RIG *rig, vfo_t vfo, setting_t level, value_t *val)
 int kenwood_set_func(RIG *rig, vfo_t vfo, setting_t func, int status)
 {
     char buf[10]; /* longest cmd is GTxxx */
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called - status = %d\n", __func__, status);
 
     switch (func)
     {
@@ -3858,7 +3862,19 @@ int kenwood_set_func(RIG *rig, vfo_t vfo, setting_t func, int status)
         snprintf(buf, sizeof(buf), "SD%04d", (status == 1) ? 0 : 50);
         RETURNFUNC(kenwood_transaction(rig, buf, NULL, 0));
 
-    default:
+        case RIG_FUNC_BANDNUM: {
+            int rc;
+            char data[8];
+        // Format requires two-digit argument string after BN
+        if ( status < 9 )
+            snprintf(buf, sizeof(buf), "BN0%d", status);
+        else
+            snprintf(buf, sizeof(buf), "BN%d", status);
+        rc = kenwood_transaction(rig, buf, data, sizeof(data));
+        return rc;
+        }
+
+       default:
         rig_debug(RIG_DEBUG_ERR, "Unsupported set_func %s", rig_strfunc(func));
         RETURNFUNC(-RIG_EINVAL);
     }
@@ -3877,7 +3893,7 @@ int get_kenwood_func(RIG *rig, const char *cmd, int *status)
     char buf[10];
     int offset = 2;
 
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called - cmd = %s\n", __func__, cmd);
 
     if (!cmd || !status)
     {
@@ -3885,7 +3901,12 @@ int get_kenwood_func(RIG *rig, const char *cmd, int *status)
     }
 
     if (strlen(cmd) == 3) { offset = 3; } // some commands are 3 letters
-
+    
+    // Nasty workaround for K3 BN command requires 4 byte response
+    // This whole routine needs rethinking
+    // if ( strncmp(cmd, "BN", 2) )
+       //  offset = 3;
+    
     retval = kenwood_safe_transaction(rig, cmd, buf, sizeof(buf), offset + 1);
 
     if (retval != RIG_OK)
@@ -3908,7 +3929,7 @@ int kenwood_get_func(RIG *rig, vfo_t vfo, setting_t func, int *status)
     int retval;
     int raw_value;
 
-    rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
+    rig_debug(RIG_DEBUG_VERBOSE, "%s called - status = %d\n", __func__, *status);
 
     if (!status)
     {
@@ -3918,7 +3939,7 @@ int kenwood_get_func(RIG *rig, vfo_t vfo, setting_t func, int *status)
     switch (func)
     {
     case RIG_FUNC_FAGC:
-        retval = kenwood_safe_transaction(rig, "GT", respbuf, 20, 5);
+        retval = kenwood_safe_transaction(rig, "GT", respbuf, sizeof(respbuf), 5);
 
         if (retval != RIG_OK)
         {
@@ -3997,7 +4018,7 @@ int kenwood_get_func(RIG *rig, vfo_t vfo, setting_t func, int *status)
         RETURNFUNC(get_kenwood_func(rig, "XT", status));
 
     case RIG_FUNC_TUNER:
-        retval = kenwood_safe_transaction(rig, "AC", respbuf, 20, 5);
+        retval = kenwood_safe_transaction(rig, "AC", respbuf, sizeof(respbuf), 5);
 
         if (retval != RIG_OK)
         {
@@ -4011,7 +4032,7 @@ int kenwood_get_func(RIG *rig, vfo_t vfo, setting_t func, int *status)
     {
         int raw_value;
 
-        retval = kenwood_safe_transaction(rig, "SD", respbuf, 20, 6);
+        retval = kenwood_safe_transaction(rig, "SD", respbuf, sizeof(respbuf), 6);
 
         if (retval != RIG_OK)
         {
@@ -4022,6 +4043,14 @@ int kenwood_get_func(RIG *rig, vfo_t vfo, setting_t func, int *status)
         *status = (raw_value == 0) ? 1 : 0;
         RETURNFUNC(RIG_OK);
     }
+
+        case RIG_FUNC_BANDNUM: {
+            int raw_value;
+            int rc = kenwood_safe_transaction(rig, "BN", respbuf, sizeof(respbuf), 4);
+            sscanf(respbuf + 2, "%d", &raw_value);
+            *status = raw_value;
+            return rc;
+        }
 
     default:
         rig_debug(RIG_DEBUG_ERR, "Unsupported get_func %s", rig_strfunc(func));

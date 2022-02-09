@@ -696,6 +696,11 @@ static const struct
     { RIG_FUNC_TRANSCEIVE, "TRANSCEIVE" },
     { RIG_FUNC_SPECTRUM, "SPECTRUM" },
     { RIG_FUNC_SPECTRUM_HOLD, "SPECTRUM_HOLD" },
+    { RIG_FUNC_SPOT, "SPOT"},
+    { RIG_FUNC_ABSWAP, "ABSWAP"},
+    { RIG_FUNC_TUNE, "TUNE"},
+    { RIG_FUNC_RX, "RECEIVE_MODE"},
+    { RIG_FUNC_CWTX, "CW TRANSMIT"},
     { RIG_FUNC_NONE, "" },
 };
 
@@ -884,6 +889,7 @@ static const struct
     { RIG_LEVEL_SPECTRUM_AVG, "SPECTRUM_AVG" },
     { RIG_LEVEL_SPECTRUM_ATT, "SPECTRUM_ATT" },
     { RIG_LEVEL_TEMP_METER, "TEMP_METER" },
+    { RIG_LEVEL_CWSPEED, "CW SPEED"},
     { RIG_LEVEL_NONE, "" },
 };
 

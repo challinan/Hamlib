@@ -43,12 +43,15 @@
 
 #define K3_FUNC_ALL (RIG_FUNC_NB|RIG_FUNC_VOX|RIG_FUNC_APF|\
     RIG_FUNC_DUAL_WATCH|RIG_FUNC_DIVERSITY|\
-    RIG_FUNC_LOCK|RIG_FUNC_RIT|RIG_FUNC_XIT)
+    RIG_FUNC_LOCK|RIG_FUNC_RIT|RIG_FUNC_XIT|RIG_FUNC_SPOT|RIG_FUNC_ABSWAP|\
+    RIG_FUNC_TUNE|RIG_FUNC_RX|RIG_FUNC_CWTX|RIG_FUNC_TXTEST|RIG_FUNC_BANDNUM|\
+    RIG_FUNC_VFOA2B|RIG_FUNC_XFIL)
 
 #define K3_LEVEL_ALL (RIG_LEVEL_ATT|RIG_LEVEL_PREAMP|RIG_LEVEL_AGC|RIG_LEVEL_SQL|\
     RIG_LEVEL_STRENGTH|RIG_LEVEL_ALC|RIG_LEVEL_RFPOWER|RIG_LEVEL_KEYSPD|\
     RIG_LEVEL_AF|RIG_LEVEL_RF|RIG_LEVEL_MICGAIN|RIG_LEVEL_COMP|\
-    RIG_LEVEL_NR|RIG_LEVEL_MONITOR_GAIN|RIG_LEVEL_RAWSTR|RIG_LEVEL_RFPOWER_METER|RIG_LEVEL_RFPOWER_METER_WATTS)
+    RIG_LEVEL_NR|RIG_LEVEL_MONITOR_GAIN|RIG_LEVEL_RAWSTR|RIG_LEVEL_RFPOWER_METER|\
+    RIG_LEVEL_RFPOWER_METER_WATTS|RIG_LEVEL_SWR|RIG_LEVEL_CWSPEED|RIG_LEVEL_ICONSTATUS)
 
 #define K3_VFO (RIG_VFO_A|RIG_VFO_B)
 #define K3_VFO_OP (RIG_OP_UP|RIG_OP_DOWN)
@@ -1928,6 +1931,17 @@ int k3_set_level(RIG *rig, vfo_t vfo, setting_t level, value_t val)
                  (int)(val.f * k3_get_maxpower(rig)));
         break;
 
+    case RIG_LEVEL_CWSPEED: {
+        // K3 needs KSnnn where nnn is 080 - 050 wpm
+        if ( val.i < 10 )
+            snprintf(levelbuf, sizeof(levelbuf), "KS00%d", val.i);
+        else
+            snprintf(levelbuf, sizeof(levelbuf), "KS0%d", val.i);
+
+        rig_debug(RIG_DEBUG_VERBOSE, "%s called - CMD string = %s\n", __func__, levelbuf);
+        }
+        break;
+
     default:
         return kenwood_set_level(rig, vfo, level, val);
     }
@@ -1936,7 +1950,7 @@ int k3_set_level(RIG *rig, vfo_t vfo, setting_t level, value_t val)
 }
 
 /*
- * Handle S-meter (SM, SMH) level locally and pass rest to kenwood_get_level()
+ * Handle S-meter (SM, SMH) and SWR level locally and pass rest to kenwood_get_level()
  */
 int k3_get_level(RIG *rig, vfo_t vfo, setting_t level, value_t *val)
 {
@@ -2219,6 +2233,39 @@ int k3_get_level(RIG *rig, vfo_t vfo, setting_t level, value_t *val)
         val->f = (float) lvl / k3_get_maxpower(rig);
         break;
 
+    case RIG_LEVEL_SWR:
+        retval = kenwood_safe_transaction(rig, "SW", levelbuf, sizeof(levelbuf), 5);
+        if (retval != RIG_OK) {
+            return retval;
+        }
+
+        sscanf(levelbuf + 2, "%d", &lvl);
+        val->f = (float) lvl;
+        break;
+
+    case RIG_LEVEL_CWSPEED:
+        retval = kenwood_safe_transaction(rig, "KS", levelbuf, sizeof(levelbuf), 5);
+        if (retval != RIG_OK) {
+            return retval;
+        }
+
+        sscanf(levelbuf + 2, "%d", &lvl);
+        val->i = (int) lvl;
+        return retval;
+        break;
+
+    case RIG_LEVEL_ICONSTATUS:
+        rig_debug(RIG_DEBUG_VERBOSE, "%s called - ICONSTATUS being called %s\n", __func__, levelbuf);
+        retval = kenwood_safe_transaction(rig, "IC", levelbuf, sizeof(levelbuf), 7);
+        if (retval != RIG_OK) {
+            return retval;
+        }
+
+        // rig_debug(RIG_DEBUG_VERBOSE, "%s called - ICONSTATUS returned %s\n", __func__, levelbuf);
+        memcpy(val->s, levelbuf+2, 5);
+        return retval;
+        break;
+
     default:
         return kenwood_get_level(rig, vfo, level, val);
     }
@@ -2345,27 +2392,70 @@ int kx3_get_level(RIG *rig, vfo_t vfo, setting_t level, value_t *val)
 int k3_set_func(RIG *rig, vfo_t vfo, setting_t func, int status)
 {
     char buf[10];
-
+    
     rig_debug(RIG_DEBUG_VERBOSE, "%s called\n", __func__);
-
+    
     switch (func)
     {
-    case RIG_FUNC_APF:
-        snprintf(buf, sizeof(buf), "AP%c", (status == 0) ? '0' : '1');
-        break;
+        case RIG_FUNC_APF:
+            snprintf(buf, sizeof(buf), "AP%c", (status == 0) ? '0' : '1');
+            break;
+            
+        case RIG_FUNC_DUAL_WATCH:
+            snprintf(buf, sizeof(buf), "SB%c", (status == 0) ? '0' : '1');
+            break;
+            
+        case RIG_FUNC_DIVERSITY:
+            snprintf(buf, sizeof(buf), "DV%c", (status == 0) ? '0' : '1');
+            break;
+            
+        case RIG_FUNC_SPOT:
+            snprintf(buf, sizeof(buf), "SWT42");
+            break;
+            
+        case RIG_FUNC_ABSWAP:
+            snprintf(buf, sizeof(buf), "SWT11");
+            break;
+            
+        case RIG_FUNC_XFIL:
+            snprintf(buf, sizeof(buf), "SWT29");
+            break;
+            
+        case RIG_FUNC_VFOA2B:
+            snprintf(buf, sizeof(buf), "SWT13");
+            break;
 
-    case RIG_FUNC_DUAL_WATCH:
-        snprintf(buf, sizeof(buf), "SB%c", (status == 0) ? '0' : '1');
-        break;
-
-    case RIG_FUNC_DIVERSITY:
-        snprintf(buf, sizeof(buf), "DV%c", (status == 0) ? '0' : '1');
-        break;
-
-    default:
-        return kenwood_set_func(rig, vfo, func, status);
+        case RIG_FUNC_TUNE:
+            snprintf(buf, sizeof(buf), "SWH16");
+            break;
+            
+        case RIG_FUNC_RX:
+            snprintf(buf, sizeof(buf), "RX");
+            break;
+            
+        case RIG_FUNC_CWTX: {
+            // Transmit a CW character - does not return any response
+            snprintf(buf, sizeof(buf), "KYW%c", status);
+            break;
+        }
+            
+        case RIG_FUNC_TXTEST:
+            snprintf(buf, sizeof(buf), "SWH18");
+            break;
+            
+        case RIG_FUNC_BANDNUM: {
+            rig_debug(RIG_DEBUG_VERBOSE, "%s called - status = %d\n", __func__, status);
+            if ( status < 9 )
+                snprintf(buf, sizeof(buf), "BN0%d", status);
+            else
+                snprintf(buf, sizeof(buf), "BN%d", status);
+            RETURNFUNC(kenwood_transaction(rig, buf, NULL, 0));
+            }
+            
+        default:
+            return kenwood_set_func(rig, vfo, func, status);
     }
-
+    
     return kenwood_transaction(rig, buf, NULL, 0);
 }
 
@@ -2399,6 +2489,9 @@ int k3_get_func(RIG *rig, vfo_t vfo, setting_t func, int *status)
 
     case RIG_FUNC_DIVERSITY:
         return get_kenwood_func(rig, "DV", status);
+    
+    case RIG_FUNC_BANDNUM:
+        return kenwood_get_func(rig, vfo, RIG_FUNC_BANDNUM, status);
 
     default:
         return kenwood_get_func(rig, vfo, func, status);
