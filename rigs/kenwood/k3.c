@@ -51,7 +51,8 @@
     RIG_LEVEL_STRENGTH|RIG_LEVEL_ALC|RIG_LEVEL_RFPOWER|RIG_LEVEL_KEYSPD|\
     RIG_LEVEL_AF|RIG_LEVEL_RF|RIG_LEVEL_MICGAIN|RIG_LEVEL_COMP|\
     RIG_LEVEL_NR|RIG_LEVEL_MONITOR_GAIN|RIG_LEVEL_RAWSTR|RIG_LEVEL_RFPOWER_METER|\
-    RIG_LEVEL_RFPOWER_METER_WATTS|RIG_LEVEL_SWR|RIG_LEVEL_CWSPEED|RIG_LEVEL_ICONSTATUS)
+    RIG_LEVEL_RFPOWER_METER_WATTS|RIG_LEVEL_SWR|RIG_LEVEL_CWSPEED|\
+    RIG_LEVEL_ICONSTATUS|RIG_LEVEL_XFILV)
 
 #define K3_VFO (RIG_VFO_A|RIG_VFO_B)
 #define K3_VFO_OP (RIG_OP_UP|RIG_OP_DOWN)
@@ -2263,6 +2264,17 @@ int k3_get_level(RIG *rig, vfo_t vfo, setting_t level, value_t *val)
 
         // rig_debug(RIG_DEBUG_VERBOSE, "%s called - ICONSTATUS returned %s\n", __func__, levelbuf);
         memcpy(val->s, levelbuf+2, 5);
+        return retval;
+        break;
+
+    case RIG_LEVEL_XFILV:
+        retval = kenwood_safe_transaction(rig, "XF", levelbuf, sizeof(levelbuf), 3);
+        if (retval != RIG_OK) {
+            return retval;
+        }
+
+        sscanf(levelbuf + 2, "%d", &lvl);
+        val->i = (int) lvl;
         return retval;
         break;
 

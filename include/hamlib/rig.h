@@ -950,7 +950,7 @@ typedef uint64_t rig_level_e;
 #define RIG_LEVEL_TEMP_METER           CONSTANT_64BIT_FLAG(48)      /*!< \c TEMP_METER -- arg int (C, centigrade) */
 #define RIG_LEVEL_CWSPEED              CONSTANT_64BIT_FLAG(48)      /*!< \c K3 CW Keyer Speed */
 #define RIG_LEVEL_ICONSTATUS           CONSTANT_64BIT_FLAG(49)      /*!< \c K3 Icons and Status */
-#define RIG_LEVEL_50           CONSTANT_64BIT_FLAG(50)      /*!< \c Future use */
+#define RIG_LEVEL_XFILV        CONSTANT_64BIT_FLAG(50)      /*!< \c K3 Filter Value */
 #define RIG_LEVEL_51           CONSTANT_64BIT_FLAG(51)      /*!< \c Future use */
 #define RIG_LEVEL_52           CONSTANT_64BIT_FLAG(52)      /*!< \c Future use */
 #define RIG_LEVEL_53           CONSTANT_64BIT_FLAG(53)      /*!< \c Future use */
